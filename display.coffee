@@ -1,7 +1,9 @@
 @App = @App || {}
 
+
 App.plot_bars = (bar_data) ->	
 
+	App.make_x_axis("year")
 	App.scale_x_to_fit(bar_data)
 
 	bars = App.svg.selectAll(".bar")
@@ -29,6 +31,7 @@ show_data = (d,i) ->
 
 hide_data = (d, i) ->
 	$(this).attr('opacity', '1')
+
 
 App.get_filter_values = (column_name) ->
 	$(".filters tr.#{column_name}.active")
@@ -93,10 +96,8 @@ draw_from_filters = () ->
 
 	if d3.sum(filters.map((f) -> f.values.length )) == 0
 		App.scale_y_to_fit(App.bar_data)
-
 	App.plot_bars(App.bar_data)
 	$('#detail').text("")
-
 
 
 App.rescale = (bar_data) ->

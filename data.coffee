@@ -34,6 +34,7 @@ d3.csv('china_active.csv', (data) ->
 	App.recipient_names = App.projects[3].lut
 	App.sector_names = App.projects[1].lut
 	App.years = App.projects[2].lut
+
 	App.flow_classes = App.projects[4].lut
 
 	make_filter_selectors("recipient", App.recipient_names)
@@ -43,7 +44,7 @@ d3.csv('china_active.csv', (data) ->
 
 
 	App.make_yearly_sums(App.projects)
-	App.make_x_axis("year")
+	
 	App.scale_y_to_fit(App.bar_data)
 
 	App.plot_bars(App.bar_data)
@@ -71,6 +72,8 @@ make_filter_selectors = (column_name, values, default_active = "inactive") ->
 			</tr>")
 	)
 
+
+
 App.make_yearly_sums = (table) ->
 	yearly_sum_result = table.query({
 		dims: ["year"],
@@ -83,6 +86,7 @@ App.make_yearly_sums = (table) ->
 
 	App.bar_data = yearly_sums
 	
+
 App.make_x_axis = (column) ->
 	domain = App.get_filter_values(column)
 
@@ -103,6 +107,7 @@ App.make_x_axis = (column) ->
 
 App.scale_y_to_fit = (bar_data) ->
 	console.log "scale_y_to_fit", bar_data
+
 	amount_domain = [
 		0, 
 		d3.max(bar_data.map((d) -> d.amount))
@@ -137,7 +142,6 @@ App.scale_y_to_fit = (bar_data) ->
 
 	amount_axis	
 		.call(y_axis)
-
 
 App.scale_x_to_fit = (bar_data) ->
 
