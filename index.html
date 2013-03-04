@@ -1,7 +1,7 @@
 <html>
 	<head>
 
-		<title>Trying out Datavore</title>
+		<title> AidData 2.1 </title>
 		<meta  charset="utf-8" />
 		<script type="text/javascript" src='//cdnjs.cloudflare.com/ajax/libs/d3/3.0.1/d3.v3.min.js'  charset="utf-8"></script>
 		<script type="text/javascript" src='https://raw.github.com/StanfordHCI/datavore/master/dv.js'></script>
@@ -15,17 +15,19 @@
 		<link rel="stylesheet/less" type="text/css" href="styles.less"></link>
 
 		<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/less.js/1.3.3/less.min.js'></script>
+
 	</head>
 	<body>
 		<div class='row'>
-			<span class='alert info span6 offset3'>Optimized for Google Chrome.</span>
+			<span class='alert info span12'>Optimized for Google Chrome.
+			Data from <a href='../zips/aiddata2_1_donor_recipient_year_purpose_csv.zip'>AidData 2.1 aggregated csv</a>.</span>
 		</div>
 
 		<div class='row' id='vis'>
 			<div id='now_showing' class='row'>
 				<div class='span6'>
 					<h1 >
-						China in Africa
+						AidData 2.1
 					</h1>
 					<p id='detail'>
 						<i>Mouseover for detail</i>
@@ -37,6 +39,9 @@
 					</span>
 				</div>
 			</div>
+			<div id='waiting'>
+				<p>Loading AidData 2.1 <a href='../zips/aiddata2_1_donor_recipient_year_purpose_csv.zip'>from csv</a>...</p>
+			</div>
 		</div>
 
 		<div class='row'>
@@ -44,7 +49,7 @@
 			</table>
 			<table class='filters table-hover span3' id='sector_filters'>
 			</table>
-			<table class='filters table-hover span3' id='flow_class_filters'>
+			<table class='filters table-hover span3' id='donor_filters'>
 			</table>
 			<table class='filters table-hover span3' id='year_filters'>
 			</table>

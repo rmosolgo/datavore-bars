@@ -5,10 +5,9 @@ App.plot_bars = (options = {bar_data: App.bar_data, this_x_axis: App.current_x_a
 	
 	this_x_axis = options.this_x_axis
 
-	if App.get_filter_values(this_x_axis).length == 0
+	if !this_x_axis
 		this_x_axis = "year"
-
-	make_x_axis(this_x_axis)
+		make_x_axis(this_x_axis)
 
 
 	console.log "Plot bars ", this_x_axis
@@ -49,8 +48,9 @@ App.plot_bars = (options = {bar_data: App.bar_data, this_x_axis: App.current_x_a
 				h + "px" )
 			.style("fill", (d) -> App.amount_color_scale(d.value) )
 
-	bars.on('mouseover', show_data)
-	bars.on('mouseout', hide_data)
+	bars
+		.on('mouseover', show_data)
+		.on('mouseout', hide_data)
 
 
 show_data = (d,i) ->
@@ -63,7 +63,7 @@ hide_data = (d, i) ->
 
 
 update_now_showing = (d) ->
-
+	# console.log(d)
 	filters = App.get_all_filters()
 	now_showing = {}
 
@@ -71,31 +71,40 @@ update_now_showing = (d) ->
 		values = filter.values
 		key = filter.key
 		if values.length > 0 && key != App.current_x_axis
-			console.log key
+			# console.log key
 			if key == "year"
 				now_showing["year"] = " In #{values.length} years,"
 			else if key == "recipients"
 				now_showing["recipient"] = "to #{values.length} countries"
 			else if key == "sector"
-				now_showing["sector"] = "in #{values.length} sectors"
-			else if key == "flow_class"
-				now_showing["flow_class"] = "by #{values.length} modalities"
-		else if key == App.current_x_axis
-			now_showing["key"] = d.key
-		)
+				now_showing["sector"] = " in #{values.length} sectors"
+			else if key == "donor"
+				now_showing["donor"] = "from #{values.length} donors"
 
-	# console.log "now_showing", now_showing
+		else if key == App.current_x_axis
+			if key == "year"
+				now_showing["year"] = " In #{d.key},"
+			else if key == "recipient"
+				now_showing["recipient"] = "to #{d.key}"
+			else if key == "sector"
+				now_showing["sector"] = " for #{d.key}"
+			else if key == "donor"
+				now_showing["donor"] = "from #{d.key}"	
+	)
+
+	console.log "now_showing", now_showing
 
 	now_showing_string = "#{now_showing['year'] || "" }" +
-		" China provided $#{d3.format(',')(d.value)}" +
-		" #{now_showing['recipient'] || '' }" +
-		" #{now_showing['sector'] || '' }" +
-		" #{now_showing['flow_class'] || '' }." 
+		" $#{d3.format(',')(d.value)} went " +
+		" #{now_showing['donor'] || 'from all donors' }" +
+		" #{now_showing['recipient'] || 'to all countries' }" +
+		"#{now_showing['sector'] || '' }." 
+		
 
 	$('#detail').text(now_showing_string)
 
 App.draw_from_filters = () ->
-	console.log "Draw from filters, x-axis:", App.current_x_axis
+	# console.log "Draw from filters, x-axis:", App.current_x_axis
 	
 	filters = App.get_all_filters()
 
@@ -128,6 +137,7 @@ make_x_axis = (column) ->
 	$("##{column}_filters .x_axis_controller").addClass('current_x_axis')
 
 	domain = App.get_filter_values(column)
+	
 	if domain.length == 0
 		$("##{column}_filters .inactive").toggleClass("inactive").toggleClass("active")
 		domain = App.get_filter_values(column)
