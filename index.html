@@ -16,24 +16,32 @@
 		<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/less.js/1.3.3/less.min.js'></script>
 	</head>
 	<body>
-		<div id='now_showing'>
-			<h1 >
-				China in Africa
-			</h1>
-			<p id='detail'>
-				<i>Mouseover for detail</i>
-			</p>
-			<p id='rescale' onclick="App.rescale(App.bar_data)">
-				Click to rescale
-			</p>
+		<div id='now_showing' class='row'>
+			<div class='span6'>
+				<h1 >
+					China in Africa
+				</h1>
+				<p id='detail'>
+					<i>Mouseover for detail</i>
+				</p>
+			</div>
+			<div class='span6'>
+				<span id='rescale' class='btn btn-primary' onclick="App.rescale(App.bar_data)">
+					Rescale
+				</span>
+			</div>
 		</div>
 		<div id='vis'>
 		</div>
 
 		<div class='row'>
-			<table class='filters table table-striped table-hover span6' id='recipient_filters'>
+			<table class='filters  table-hover span3' id='recipient_filters'>
 			</table>
-			<table class='filters table table-striped table-hover span6' id='sector_filters'>
+			<table class='filters table-hover span3' id='sector_filters'>
+			</table>
+			<table class='filters table-hover span3' id='flow_class_filters'>
+			</table>
+			<table class='filters table-hover span3' id='year_filters'>
 			</table>
 		</div>
 

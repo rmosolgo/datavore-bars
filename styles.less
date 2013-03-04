@@ -77,23 +77,21 @@ body {
 
 .filters {
 
-	td {
+	max-height:100px;
+	overflow-y:scroll;
 
+	tr {
 
-		&.column {
-			display:none;
+		&.active td {
+			background-color: #cfd;
 		}
-
-		&.controller {
-			cursor:pointer;
-
-			&.active {
-				background-color: #cfd;
-			}
-
-		}
-
-
 
 	}
+
+	.controller {
+			cursor:pointer;
+	}
+
+
+		
 }
