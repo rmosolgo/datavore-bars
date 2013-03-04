@@ -4,7 +4,7 @@
 App.svg = d3.select("#vis").append('svg')
 		.attr("height", App.config.vis_height)
 		.attr("width", App.config.vis_width)
-		.style("border", "2px solid #777")
+		# .style("border", "2px solid #777")
 
 d3.csv('china_active.csv', (data) ->
 
@@ -101,10 +101,10 @@ App.scale_y_to_fit = (bar_data) ->
 		]
 
 	cfg = App.config
-	App.amount_scale = d3.scale.pow()
+	App.amount_scale = d3.scale.linear()
 		.domain(amount_domain)
 		.range([cfg.vis_height - cfg.vis_padding_top - cfg.vis_padding_bottom, 5])
-		.exponent(.5)
+		#.exponent(.5)
 
 	y_axis = d3.svg.axis()
 		.scale(App.amount_scale)

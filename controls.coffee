@@ -34,7 +34,7 @@ App.get_all_filters = () ->
 	# console.log "Get all filters", filters
 	filters
 
-App.rescale = (bar_data) ->
-	App.scale_y_to_fit(bar_data)
-	App.plot_bars({bar_data: bar_data})
+App.rescale = () ->
+	App.scale_y_to_fit(App.bar_data)
+	App.plot_bars()
 

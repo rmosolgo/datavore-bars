@@ -21,12 +21,32 @@ App.plot_bars = (options = {bar_data: App.bar_data, this_x_axis: App.current_x_a
 
 	bars.exit().remove()
 
-		
+	rescale_when_done = false
+
 	bars.transition()
+			.delay((d,i) -> i*20 )
 			.attr("x", (d,i) -> "#{ App.config.vis_padding_left + App.x_scale(d.key) }px")
 			.attr("y", (d) -> App.config.vis_padding_top + App.amount_scale(d.value) + "px" )
 			.attr("width", App.x_width )
-			.attr("height", (d) -> (App.config.vis_height - App.config.vis_padding_top - App.config.vis_padding_bottom) - App.amount_scale(d.value) + "px" )
+			.attr("height", (d) -> 
+				max_h = (App.config.vis_height - App.config.vis_padding_top - App.config.vis_padding_bottom)
+				h = max_h - App.amount_scale(d.value) 
+				if h > max_h
+					rescale_when_done = true
+				h + "px" )
+			.style("fill", (d) -> App.amount_color_scale(d.value) )
+
+	if rescale_when_done
+		App.scale_y_to_fit(App.bar_data)
+		bars.transition()
+			.delay((d,i) -> ((i*20) + 250))
+			.attr("y", (d) -> App.config.vis_padding_top + App.amount_scale(d.value) + "px" )
+			.attr("height", (d) -> 
+				max_h = (App.config.vis_height - App.config.vis_padding_top - App.config.vis_padding_bottom)
+				h = max_h - App.amount_scale(d.value) 
+				if h > max_h
+					rescale_when_done = true
+				h + "px" )
 			.style("fill", (d) -> App.amount_color_scale(d.value) )
 
 	bars.on('mouseover', show_data)
