@@ -2,12 +2,13 @@
 @App = @App || {}
 
 App.svg = d3.select("#vis").append('svg')
-		.attr("height", '300px')
-		.attr("width", '800px')
+		.attr("height", App.config.vis_height)
+		.attr("width", App.config.vis_width)
 		.style("border", "2px solid #777")
 
 d3.csv('china_active.csv', (data) ->
 
+	data = data.filter((d) -> parseInt(d.year) >= 2000 )
 	App.projects = dv.table()
 	
 	App.projects.addColumn(
@@ -31,6 +32,7 @@ d3.csv('china_active.csv', (data) ->
 		data.map((d) -> d.flow_class),
 		dv.type.ordinal)
 
+
 	App.recipient_names = App.projects[3].lut
 	App.sector_names = App.projects[1].lut
 	App.years = App.projects[2].lut
@@ -41,13 +43,11 @@ d3.csv('china_active.csv', (data) ->
 	make_filter_selectors("sector", App.sector_names)
 	make_filter_selectors("flow_class", App.flow_classes)
 	make_filter_selectors("year", App.years, "active")
-
-
-	App.make_yearly_sums(App.projects)
 	
+	App.make_sums(App.projects, "year")
 	App.scale_y_to_fit(App.bar_data)
 
-	App.plot_bars(App.bar_data)
+	App.plot_bars()
 )
 
 make_filter_selectors = (column_name, values, default_active = "inactive") ->
@@ -55,11 +55,15 @@ make_filter_selectors = (column_name, values, default_active = "inactive") ->
 
 	$(target).append(
 		"<tr>
-			<th class='controller btn' onclick='App.set_all_filters(\"active\", this)'>
-				Set all
+			<th class='controller x_axis_controller btn' onclick='App.make_with_new_x_axis(\"#{column_name}\")'>
+				Set this on X-axis
 			</th>
-			<th class='controller btn' onclick='App.set_all_filters(\"inactive\", this)'>
+
+			<th class='controller btn deactivator' onclick='App.set_all_filters(\"inactive\", this)'>
 				Remove All
+			</th>
+			<th class='controller btn activator' onclick='App.set_all_filters(\"active\", this)'>
+				Set all
 			</th>
 		</tr>")
 
@@ -74,55 +78,47 @@ make_filter_selectors = (column_name, values, default_active = "inactive") ->
 
 
 
-App.make_yearly_sums = (table) ->
-	yearly_sum_result = table.query({
-		dims: ["year"],
+App.make_sums = (table, this_x_axis) ->
+	console.log "Making sums by x-axis:", this_x_axis
+	sum_result = table.query({
+		dims: [this_x_axis],
 		vals: [dv.sum('amount')],	
 	})
 
-	yearly_sums = yearly_sum_result[0].map((d,i) ->
-		{year: d, amount: yearly_sum_result[1][i]}
+	sums = sum_result[0].map((d,i) ->
+		{key: d, value: sum_result[1][i]}
 	)
 
-	App.bar_data = yearly_sums
+	App.bar_data = sums
 	
-
-App.make_x_axis = (column) ->
-	domain = App.get_filter_values(column)
-
-	App._x_scale_calculator = d3.scale.ordinal()
-			.domain(domain)
-			.rangeBands([0,650], .1)
-
-	App.x_scale = (d) -> 
-		App._x_scale_calculator(d[column])
-
-	App.x_width = (700 * .9)/domain.length
-
-	App.x_axis = d3.svg.axis()
-		.scale(App._x_scale_calculator)
-		.orient('bottom')
-		# .tickFormat()
-		# .ticks(6, (d) -> "$" + d/1000000000 + " bil")
 
 App.scale_y_to_fit = (bar_data) ->
 	console.log "scale_y_to_fit", bar_data
 
 	amount_domain = [
 		0, 
-		d3.max(bar_data.map((d) -> d.amount))
+		d3.max(bar_data.map((d) -> d.value))
 		]
 
+	cfg = App.config
 	App.amount_scale = d3.scale.pow()
 		.domain(amount_domain)
-		.range([200, 5])
+		.range([cfg.vis_height - cfg.vis_padding_top - cfg.vis_padding_bottom, 5])
 		.exponent(.5)
 
 	y_axis = d3.svg.axis()
 		.scale(App.amount_scale)
 		.orient('right')
-		# .tickFormat()
-		.ticks(6, (d) -> "$" + d/1000000000 + " bil")
+		 .tickFormat((amount) ->
+				if 100 > amount 
+					"#{d3.format("0,r")(d3.round(amount,0))}"
+				else if 1000000 > amount >= 1000
+					"#{d3.round((amount/1000),0)}K"
+				else if 1000000000 > amount >= 1000000
+					"#{d3.round((amount/1000000),1)}M"
+				else if amount >= 1000000000
+					"#{d3.format("0,r")(d3.round((amount/1000000000),2))}B")
+		.ticks(4)
 
 	App.amount_color_scale = d3.scale.linear()
 		.domain([
@@ -138,20 +134,8 @@ App.scale_y_to_fit = (bar_data) ->
 	amount_axis
 		.enter().append('g')
 		.attr('class', 'amount_axis')
-		.attr('transform', 'translate(10,100)')
+		.attr('transform', "translate(10, #{cfg.vis_padding_top})")
 
 	amount_axis	
 		.call(y_axis)
 
-App.scale_x_to_fit = (bar_data) ->
-
-	this_x_axis = App.svg.selectAll('.x_axis')
-		.data([bar_data])
-
-	this_x_axis
-		.enter().append('g')
-		.attr('class', 'x_axis')
-		.attr('transform', 'translate(110,250)')
-
-	this_x_axis	
-		.call(App.x_axis)
