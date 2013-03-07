@@ -6,38 +6,51 @@
 
 
 body {
+	background-color: rgba(49, 126, 172, .5);
 	padding: 20px;
 	.alert {
 		margin-bottom: 10px !important;
 	}
+
+	.container {
+		background-color: #fff;
+		padding:20px;
+		.box-shadow(3px 3px 10px 5px)
+
+	}
+
+	.hero-unit {
+		margin-top: 80px;
+	}
+
 }
 
 #vis {
 	border: 2px solid #777;
 	margin:10px ;
 	padding:10px ;
+	min-height: 100px;
+	max-width: 900px;
+	.box-shadow(3px 3px 10px 5px)
 
 	#waiting {
-		margin: 100px;
-		padding: 20px;
-		font-style: italic;
+		margin: 50px;
 		color: #555;
-		background-color: rgba(220, 220, 255, .2);
+	}
 
+	.domain {
+		visibility: hidden;
 	}
 }
 
 #now_showing {
-	/* position:absolute;
-	top:25px;
-	left:40px;
-	*/
 
 	h1 {
 		margin: 5px;
 	}
 	p {
 		margin: 5px;
+		min-height: 50px ;
 
 		&#rescale {
 			cursor: pointer;
@@ -49,24 +62,26 @@ body {
 	}
 }
 
-#vis {
-	min-height: 100px;
+.current_x_axis, .current_y_axis {
+	color: #942;
+	&:hover {
+		color: #c96;
+	}
 }
 
-.domain {
-	visibility: hidden;
+#value_container {
+	margin: 8px;
 }
 
+#filter_container {
+	background-color: white;
+	.filters {
+
+		max-height:200px;
+		overflow-y:scroll;
 
 
-.filters {
-
-	max-height:100px;
-	overflow-y:scroll;
-
-	tr {
-
-		&.active td {
+		.active {
 			background-color: #cfd;
 
 			&:hover{ 
@@ -74,18 +89,19 @@ body {
 			}
 		}
 
+		.controller {
+				cursor:pointer;
+		}
+
+		.filter_box {
+			margin-top: 5px;
+		}
+
+		.value {
+			display: block;
+		}
 	}
 
-	.controller {
-			cursor:pointer;
-	}
 
-	.filter_box {
-		margin-top: 5px;
-	}
 
-}
-
-.current_x_axis {
-	color: #942;
 }
