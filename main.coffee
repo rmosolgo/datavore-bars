@@ -25,6 +25,9 @@ App.start_url_observer = () ->
 		else
 			App.set_remove_blanks(false)
 
+		if params('sort_order')
+			App.sort_order(params('sort_order'))
+
 		if params('x_axis') != App.current_x_axis()
 			target_x_axis = params('x_axis') || App.filters[0]
 			App.current_x_axis(target_x_axis)
@@ -41,7 +44,7 @@ App.start_url_observer = () ->
 					console.log(v)
 					App.set_filter(f, v, "active")
 
-		App.render_dashboard_from_url_state()
+		App.render_dashboard()
 
 	# This is an initializer:
 	if !App.current_x_axis()

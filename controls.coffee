@@ -7,7 +7,8 @@ App.render_url_from_html_state = () ->
 	url_params["y_axis"] = App.current_y_axis()
 	
 	url_params["remove_blanks"] = "#{App.remove_blanks()}"
-
+	url_params["sort_order"] = App.sort_order()
+	
 	App.get_all_filters().forEach((f) ->
 		if f.values.length > 0
 			url_params[f.key] = f.values.join(App.config.param_joiner)
@@ -45,11 +46,7 @@ App.current_y_axis = (column) ->
 
 
 	
-App.remove_blanks = () ->
-	# returns true or false
-	remove_blanks_element = $('#remove_blanks')
-	html_remove_blanks_state = remove_blanks_element.hasClass("btn-success")
-	
+
 
 App.toggle_filter = (e) ->
 	this_filter = $(e)
@@ -120,8 +117,41 @@ App.get_all_filters = () ->
 
 
 App.rescale = () ->
-	App.render_dashboard_from_url_state({rescale_y: true})
+	App.render_dashboard({rescale_y: true})
 
+App.sort_order = (set_to) ->
+	sort_order_element = $('#sort_order')
+	if set_to
+		console.log 'setting sort_order to', set_to
+
+		target_index = App.sort_orders.map((d) -> d.name).indexOf(set_to)
+		target_sort_order= App.sort_orders[target_index]
+		sort_order_element = $('#sort_order')
+			.attr("data-sort-order", target_sort_order.name)
+			.html("Sort order: #{target_sort_order.text}")
+
+		App.render_url_from_html_state()
+
+	html_sort_order_state = sort_order_element.attr("data-sort-order")
+
+App.sort_order_function = () ->
+	App.sort_orders.filter((d) -> d.name == App.sort_order())[0].function
+
+App.toggle_sort_order = () ->
+
+	number_of_sort_orders = App.sort_orders.length
+	current_index = App.sort_orders.map((d) -> d.name).indexOf(App.sort_order())
+	target_index = (current_index + 1) % number_of_sort_orders
+	target_sort_order= App.sort_orders[target_index]
+
+	App.sort_order(target_sort_order.name)
+
+App.remove_blanks = () ->
+	# returns true or false
+	remove_blanks_element = $('#remove_blanks')
+	html_remove_blanks_state = remove_blanks_element.hasClass("btn-success")
+
+	
 App.set_remove_blanks = (set_to) ->
 	remove_blanks_element = $('#remove_blanks')
 	

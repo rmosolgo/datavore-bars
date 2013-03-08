@@ -30,7 +30,7 @@ App.initialize = (csv) ->
 	window.d3.csv(csv, (data) ->
 		console.log("processing CSV")
 
-		console.log data.length
+		# console.log data.length
 		
 		if App.config.data.preprocessing_function
 			data = App.config.data.preprocessing_function(data)
@@ -118,7 +118,7 @@ make_filter_selectors = (column_name, values, span_size = "3", default_active = 
 		</div>
 		<div class='row-fluid'>
 			<span class='controller btn deactivator span6' onclick='App.set_all_filters(\"inactive\", \"#{column_name}\")'>
-				Remove All
+				Deselect All
 			</span>
 			<span class='controller btn activator span6' onclick='App.set_all_filters(\"active\", \"#{column_name}\", true)'>
 				Select Visible 
@@ -145,7 +145,7 @@ make_filter_selectors = (column_name, values, span_size = "3", default_active = 
 
 filter_these_options = (e) ->
 	# console.log "e: ", e, "this: ", this
-	entry = e.target.value.toLowerCase()
+	entry = e.target.value?.toLowerCase()
 	# console.log(entry)
 	rows = $(e.target).closest('.accordion-group').find('.value')
 	
@@ -160,5 +160,17 @@ filter_these_options = (e) ->
 	else 
 		rows.css("display", "inherit")
 
-
+App.sort_orders = [
+	{
+		name: "a_to_z"
+		text: "A &rarr; Z"
+		function: (d) -> d.key
+	}
+	{
+		name: "big_to_small"
+		text: "Max &rarr; Min"
+		function: (d) -> 
+			-d.value
+	}
+]
 

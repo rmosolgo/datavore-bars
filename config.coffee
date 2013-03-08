@@ -46,24 +46,31 @@ App.config =
 			},
 			{
 				name: "Count",
-				values_function: (data) -> data.map((d) -> 1),
+				values_function: (data) -> data.map((d) -> parseInt(d.record_count) ),
 				interface_type: "value",
 				dv_type: dv.type.numeric
 			},
 			{
-				name: "year",
+				name: "Average"
+				values_function: (data) -> data.map((d) -> 
+					parseFloat( d.commitment_usd_constant_sum  || 0)/(parseInt(d.record_count)))
+				interface_type: "value"
+				dv_type: dv.type.numeric
+			},
+			{
+				name: "Year",
 				values_function: (data) -> data.map((d) -> d.year),
 				interface_type: "filter",
 				dv_type: dv.type.ordinal
 			},
 			{
-				name: "recipient",
+				name: "Recipient",
 				values_function: (data) -> data.map((d) -> d.recipient), #_condensed),
 				interface_type: "filter",
 				dv_type: dv.type.nominal
 			},
 			{
-				name: "donor",
+				name: "Donor",
 				values_function: (data) -> data.map((d) -> d.donor),
 				interface_type: "filter",
 				dv_type: dv.type.ordinal
@@ -75,7 +82,7 @@ App.config =
 			# 	dv_type: dv.type.ordinal
 			# },
 			{
-				name: "sector",
+				name: "Purpose",
 				values_function: (data) -> data.map((d) ->  # d.sector)
 						if d.coalesced_purpose_code 
 							sector = "#{d.coalesced_purpose_code}, #{

@@ -62,12 +62,12 @@ update_now_showing = (d) ->
 		" #{now_showing['value'] || '' } " +
 		" #{now_showing['donor'] || 'from all donors' }" +
 		" #{now_showing['recipient'] || 'to all countries' }" +
-		"#{now_showing['sector'] || '' }." 		
+		" #{now_showing['sector'] || '' }." 		
 
 	$('#detail').text(now_showing_string)
 
 
-App.scale_y_to_fit = (bar_data) ->
+scale_y_to_fit = (bar_data) ->
 	# console.log "scale_y_to_fit", bar_data
 	$('#rescale').removeClass("btn-warning").addClass("btn-primary")
 
@@ -118,13 +118,12 @@ App.scale_y_to_fit = (bar_data) ->
 
 
 
-App.render_dashboard_from_url_state = (options) ->
+App.render_dashboard = (options) ->
 	# by this api, event listeners need only to alter the HTML state, 
 	# then call this function.
 
 	# except for these options:
 	rescale_y_by_request = options?.rescale_y || false
-	remove_blanks_by_request = App.remove_blanks() || false
 
 	# reset now_showing
 	$('#detail').html("<i>Mouseover for detail</i>")
@@ -164,11 +163,14 @@ App.render_dashboard_from_url_state = (options) ->
 	console.log "summing by", this_x_axis, "returned", html_state_sums
 	
 	# render new x-axis
-	if remove_blanks_by_request || App.config.always_remove_blanks
-		domain = html_state_sums.filter((d) -> d.value > 0).map((d) -> d.key)
-	else
-		domain = App.get_filter_values(this_x_axis, {all_if_none: true})
+	if App.remove_blanks() || App.config.always_remove_blanks
+		prepared_data = html_state_sums.filter((d) -> d.value > 0)
 
+	else
+		prepared_data = html_state_sums
+
+	console.log "about to make my domain:", prepared_data	
+	domain = _.sortBy(prepared_data, App.sort_order_function() ).map((d) -> d.key)
 
 	console.log "Making x axis by", this_x_axis,"with these values", domain
 
@@ -204,11 +206,11 @@ App.render_dashboard_from_url_state = (options) ->
 	# Y-SCALE still controlled separately
 	if !App.amount_scale || rescale_y_by_request
 		console.log "Fetching a new y-scale"
-		App.scale_y_to_fit(html_state_sums)
+		scale_y_to_fit(prepared_data)
 	
 	console.log "binding and rendering new bars"
 	bars = App.svg.selectAll(".bar")
-		.data(html_state_sums, (d) -> d.key )
+		.data(prepared_data, (d) -> d.key )
 		
 	bars.enter().append('rect')
 		.attr("class", "bar")
@@ -221,7 +223,7 @@ App.render_dashboard_from_url_state = (options) ->
 	max_bar_h = (App.config.vis_height - App.config.vis_padding_top - App.config.vis_padding_bottom)
 
 	bars.transition()
-			.delay((d,i) -> i*20 )
+			.delay((d,i) -> i*10 )
 			.attr("x", (d,i) -> "#{ App.config.vis_padding_left + x_scale(d.key) }px")
 			.attr("y", (d) -> App.config.vis_padding_top + App.amount_scale(d.value) + "px" )
 			.attr("width", x_width )
@@ -244,7 +246,7 @@ App.render_dashboard_from_url_state = (options) ->
 		$('#rescale').addClass("btn-primary").removeClass("btn-warning")
 
 	if the_graph_is_too_big || App.config.always_rescale_to_fit 
-		App.scale_y_to_fit(html_state_sums)		
+		scale_y_to_fit(prepared_data)		
 		bars.transition()
 			.delay((d,i) -> ((i*20) + 250))
 			.attr("y", (d) -> App.config.vis_padding_top + App.amount_scale(d.value) + "px" )
@@ -256,5 +258,6 @@ App.render_dashboard_from_url_state = (options) ->
 	bars
 		.on('mouseover', show_data)
 		.on('mouseout', hide_data)
+		.on('click', App.show_overlay)
 	console.log "finished rendering!"
 

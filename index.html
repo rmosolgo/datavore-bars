@@ -8,6 +8,7 @@
 		<script type="text/javascript" src='https://raw.github.com/StanfordHCI/datavore/master/dv.js'></script>
 
 		<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
+		<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js'></script>
 
 
 		<link href="//netdna.bootstrapcdn.com/bootswatch/2.3.0/journal/bootstrap.min.css" rel="stylesheet">
@@ -39,13 +40,24 @@
 							<i>Mouseover for detail</i>
 						</p>
 					</div>
-					<div class='span6 row-fluid'>
-						<span id='rescale' class='span4 btn btn-primary' onclick="App.rescale()">
-							Rescale
-						</span>
-						<span id='remove_blanks' class='span6 offset2 btn btn-danger' onclick="App.toggle_remove_blanks()">
-							Remove blanks: Off
-						</span>
+					<div class='span6'>
+
+						<div class='row-fluid'>
+							<span id='rescale' class='span4 btn btn-primary' onclick="App.rescale()">
+								Rescale
+							</span>
+							<span id='remove_blanks' class='span6 offset2 btn btn-danger' onclick="App.toggle_remove_blanks()">
+								Remove blanks: Off
+							</span>
+						</div>
+						<div class='row-fluid'>
+							<span id='sort_order' class='span6 offset6 btn' 
+							data-sort-order='a_to_z'
+							onclick="App.toggle_sort_order()">
+								Sort order: A &rarr; Z
+							</span>
+						</div>
+
 					</div>
 				</div>
 				<div id='waiting'>
@@ -69,6 +81,7 @@
 		<script type="text/coffeescript" src='controls.coffee'></script>
 		<script type="text/coffeescript" src='chart.coffee'></script>
 		<script type="text/coffeescript" src='data.coffee'></script>
+		<script type="text/coffeescript" src='overlay.coffee'></script>
 		<script type="text/coffeescript" src='main.coffee'></script>
 		
 	</body>
