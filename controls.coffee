@@ -3,8 +3,8 @@
 App.render_url_from_html_state = () ->
 	url_params = {}
 
-	url_params["x_axis"] = App.current_x_axis()
-	url_params["y_axis"] = App.current_y_axis()
+	url_params["x_axis"] = App.current_x_axis() || App.current_x_axis(App.filters[0])
+	url_params["y_axis"] = App.current_y_axis() || App.current_y_axis(App.values[0])
 	
 	url_params["remove_blanks"] = "#{App.remove_blanks()}"
 	url_params["sort_order"] = App.sort_order()
@@ -13,8 +13,17 @@ App.render_url_from_html_state = () ->
 		if f.values.length > 0
 			url_params[f.key] = f.values.join(App.config.param_joiner)
 		)
-	console.log 'navigating to', url_params
-	Finch.navigate url_params
+
+	viewing_overlay = $("#overlay_header").is(":visible")
+	if viewing_overlay
+		url_params["overlay"] = true
+		url_params["overlay_target"]= $('#overlay_target').text()
+		url_params["page"] = $('#page_number').text() || 1
+
+	console.log 'navigating to',  url_params
+	if App.respond_to_html_changes
+		# set to true after setting observers.
+		Finch.navigate url_params
 
 
 
@@ -35,7 +44,7 @@ App.current_y_axis = (column) ->
 	# sets to column if provided, always returns column name
 	
 	if column 
-		console.log "provided y-axis: ", column
+		console.log "requested y-axis: ", column
 		$('.y_axis_controller').removeClass("current_y_axis")
 		button = $("#value_container .y_axis_controller.#{column}").addClass('current_y_axis')
 		console.log 'requesting new with y-axis:', column , 'selector:', button	
@@ -101,12 +110,12 @@ App.get_filter_values = (column_name, options) ->
 		console.log "got values because none", values			
 	values
 
-App.get_all_filters = () ->
+App.get_all_filters = (options) ->
 	filter_types = App.filters
 	filters = []
 
 	filter_types.forEach( (f) ->
-		filter_values = App.get_filter_values(f)
+		filter_values = App.get_filter_values(f, options)
 		filter = { key: f, values: filter_values}	 
 		filters.push( filter )
 		)

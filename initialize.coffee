@@ -1,30 +1,14 @@
 
 @App = @App || {}
 
-App.initialized = () ->
-	# returns "Is the app loaded?" from html state
-	if $('.current_x_axis')[0]
-		initialized = true
-	else 
-		initialized = false
-	initialized
+
+App.initialized = false
+App.respond_to_html_changes = false
 
 App.initialize = (csv) ->
-	console.log "pulling from csv"
-		
-	if App.config.data.get_file_size
 
-		start_time = new Date
-		xhr = $.ajax(
-			type: "HEAD",
-			url: App.config.data.file,
-			success: (msg) ->
-				file_size_in_bytes = parseInt(xhr.getResponseHeader('Content-Length'))
-				console.log "xhr: ", xhr
-				console.log file_size_in_bytes, "bytes"	
-				elapsed_time = new Date - start_time
-				console.log elapsed_time
-		)
+	
+	console.log "pulling from csv"
 
 	
 	window.d3.csv(csv, (data) ->
@@ -54,23 +38,25 @@ App.initialize = (csv) ->
 				.attr("width", App.config.vis_width)
 
 
-		App.config.data.columns.forEach((d,i) ->
-			if d.interface_type == "filter"
-				make_filter_selectors(d.name, App.projects[i].lut, 3) # span 3
-			)
 
 		# Set these for access by other functions
-		App.values = App.config.data.columns.filter((d) -> d.interface_type == 'value').map((d) -> d.name )
-		App.filters = App.config.data.columns.filter((d) -> d.interface_type == 'filter').map((d) -> d.name )
+		App.values = (d.name for d in App.config.data.columns when d.interface_type == 'value')
+		App.filters = (d.name for d in App.config.data.columns when d.interface_type == 'filter')
+		App.other_attributes = (d.name for d in App.config.data.columns when d.interface_type == 'none')
+		App.attributes = (d.name for d in App.config.data.columns)
+
+		make_filter_selectors f for f in App.filters 
 
 		make_value_selector(App.values)
 
 		$('#filter_container .accordion-body').addClass("in")
 
 		$('.filter_box').on('keyup', filter_these_options)
-		console.log("finished loading")
-		App.start_url_observer()
 
+		App.initialized = true
+		console.log("finished loading")
+		
+		App.start_url_observer()
 
 	)
 
@@ -83,8 +69,8 @@ make_value_selector = (values) ->
 								</span>").join(" ")
 		)
 
-make_filter_selectors = (column_name, values, span_size = "3", default_active = "inactive") ->
-
+make_filter_selectors = (column_name, span_size = "3", default_active = "inactive") ->
+	console.log "make filter selector for ", column_name
 
 	$('#filter_container').append(
 			"<div class='accordion-group span#{span_size}'>
@@ -129,7 +115,7 @@ make_filter_selectors = (column_name, values, span_size = "3", default_active = 
 				<input type='text' class='filter_box span12' value='Type to filter...' onfocus='this.value=\"\"'>
 			</span>")
 
-	values.forEach((value,i) ->
+	App.projects[column_name].lut.forEach((value,i) ->
 		$("#{target} .filters").append(
 			"<span 
 				data-searcher='#{value.toLowerCase()}' 

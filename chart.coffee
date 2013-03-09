@@ -1,8 +1,10 @@
 @App = @App || {}
 
 show_data = (d,i) ->
+	# console.log d
 	$(this).attr("opacity", ".6")
 	update_now_showing(d)
+
 
 hide_data = (d, i) ->
 	$(this).attr('opacity', '1')
@@ -10,60 +12,31 @@ hide_data = (d, i) ->
 
 update_now_showing = (d) ->
 	# console.log(d)
-	filters = App.get_all_filters()
+	filters = App.get_all_filters({all_if_none: true})
 	now_showing = {}
 
 	filters.forEach((filter) ->
 		values = filter.values
 		key = filter.key
-		if values.length > 0 && key != App.current_x_axis()
-			# console.log key
-			if key == "year"
-				if values.length == 1
-					now_showing["year"] = "In #{values[0]},"
-				else
-					now_showing["year"] = "Over #{values.length} years,"
-			else if key == "recipient"
-				if values.length == 1
-					now_showing['recipient'] = "to #{values[0]}"
-				else 
-					now_showing["recipient"] = "to #{values.length} countries"
-			else if key == "sector"
-				if values.length == 1
-					now_showing['sector'] = "for #{values[0]}"
-				else 
-					now_showing["sector"] = " in #{values.length} sectors"
-			else if key == "donor"
-				if values.length == 1 
-					now_showing["donor"] = "from #{values[0]}"
-				else
-					now_showing["donor"] = "from #{values.length} donors"
+		this_column = (c for c in App.config.data.columns when c.name is key)[0]
+		# console.log values, key, this_column
+		if this_column?
+			if key == App.current_x_axis()
+				now_showing[this_column.name] = this_column.now_showing.single(d.key)
+			else if values.length > 1 
+				now_showing[this_column.name] = this_column.now_showing.multiple(values) 
+			else 
+				now_showing[this_column.name] = this_column.now_showing.single(values[0])
 
-		else if key == App.current_x_axis()
-			if key == "year"
-				now_showing["year"] = " In #{d.key},"
-			else if key == "recipient"
-				now_showing["recipient"] = "to #{d.key}"
-			else if key == "sector"
-				now_showing["sector"] = " for #{d.key}"
-			else if key == "donor"
-				now_showing["donor"] = "from #{d.key}"
-
-		if App.current_y_axis() == 'Commitment'	
-			now_showing['value'] = "$#{d3.format(',')(d.value)} went"
-		else if App.current_y_axis() == 'Count'
-			now_showing['value'] = "there were #{d.value} records"
-
+		measure = (c for c in  App.config.data.columns when c.name is App.current_y_axis() )[0]
+		# console.log measure
+		if measure?
+			now_showing["measure"] = measure.now_showing.value(d.value)
 	)
 
-	# console.log "now_showing", now_showing
-
-	now_showing_string = "#{now_showing['year'] || "" }" +
-		" #{now_showing['value'] || '' } " +
-		" #{now_showing['donor'] || 'from all donors' }" +
-		" #{now_showing['recipient'] || 'to all countries' }" +
-		" #{now_showing['sector'] || '' }." 		
-
+	now_showing_string = App.config.now_showing(now_showing)
+	
+	console.log "now_showing", now_showing, "string: ", now_showing_string
 	$('#detail').text(now_showing_string)
 
 
@@ -77,16 +50,18 @@ scale_y_to_fit = (bar_data) ->
 		]
 
 	cfg = App.config
+
 	App.amount_scale = d3.scale.linear()
 		.domain(amount_domain)
 		.range([cfg.vis_height - cfg.vis_padding_top - cfg.vis_padding_bottom, 5])
+		#.ticks(6)
 		#.exponent(.5)
 
 	y_axis = d3.svg.axis()
 		.scale(App.amount_scale)
 		.orient('right')
 		.tickFormat((amount) ->
-				if 100 > amount 
+				if 1000 >= amount 
 					"#{d3.format("0,r")(d3.round(amount,0))}"
 				else if 1000000 > amount >= 1000
 					"#{d3.round((amount/1000),0)}K"
@@ -94,7 +69,7 @@ scale_y_to_fit = (bar_data) ->
 					"#{d3.round((amount/1000000),1)}M"
 				else if amount >= 1000000000
 					"#{d3.format("0,r")(d3.round((amount/1000000000),2))}B")
-		.ticks(4)
+		.ticks(6)
 
 	App.amount_color_scale = d3.scale.linear()
 		.domain([
@@ -163,11 +138,12 @@ App.render_dashboard = (options) ->
 	console.log "summing by", this_x_axis, "returned", html_state_sums
 	
 	# render new x-axis
-	if App.remove_blanks() || App.config.always_remove_blanks
-		prepared_data = html_state_sums.filter((d) -> d.value > 0)
+	if App.remove_blanks() || App.config.always_remove_blanks 
+		prepared_data = (s for s in html_state_sums when s.value > 0)
 
 	else
-		prepared_data = html_state_sums
+		active_x_values = App.get_filter_values(this_x_axis, {all_if_none: true})
+		prepared_data = (s for s in html_state_sums when s.key in active_x_values )
 
 	console.log "about to make my domain:", prepared_data	
 	domain = _.sortBy(prepared_data, App.sort_order_function() ).map((d) -> d.key)
@@ -258,6 +234,6 @@ App.render_dashboard = (options) ->
 	bars
 		.on('mouseover', show_data)
 		.on('mouseout', hide_data)
-		.on('click', App.show_overlay)
+		.on('click', (d,i) -> App.show_overlay(d.key, {page: 1}))
 	console.log "finished rendering!"
 
