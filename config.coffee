@@ -1,8 +1,8 @@
 @App = @App || {}
 
 App.config =
-	chart_title: "AidData 2.1"
-	chart_longer_title: "AidData 2.1 Dashboard"
+	chart_title: "China in Africa"
+	chart_longer_title: "China in Africa"
 
 	vis_height: 300
 	vis_width: 800
@@ -137,6 +137,6 @@ App.config =
 			}
 		]
 
-
+$('title').text App.config.chart_title
 $('#chart_title').text App.config.chart_title
 $('#chart_longer_title').text App.config.chart_longer_title

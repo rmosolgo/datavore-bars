@@ -190,6 +190,7 @@ App.render_dashboard = (options) ->
 		
 	bars.enter().append('rect')
 		.attr("class", "bar")
+		.style("cursor", "pointer")
 
 	bars.exit().remove()
 
