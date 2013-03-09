@@ -92,7 +92,7 @@ App.config =
 				dv_type: dv.type.nominal
 				now_showing:
 					single: (single) -> "to #{single}"
-					multiple: (multiple) -> "to #{multiple.length} countries "
+					multiple: (multiple) -> "" #"to #{multiple.length} countries "
 			},
 			# {
 			# 	name: "Donor",
@@ -107,7 +107,7 @@ App.config =
 				dv_type: dv.type.ordinal
 				now_showing:
 					single: (single) -> "as #{single}"
-					multiple: (multiple) -> "by #{multiple.length} modalities"
+					multiple: (multiple) -> "" #by #{multiple.length} modalities"
 			},
 			{
 				name: "Purpose",
