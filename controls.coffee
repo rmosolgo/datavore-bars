@@ -33,7 +33,7 @@ App.current_x_axis = (column) ->
 	if column 
 		$('.x_axis_controller').removeClass("current_x_axis")
 		button = $("##{column}_accordion .x_axis_controller").addClass('current_x_axis')
-		console.log 'requesting new with x-axis:', column #, 'selector:', button	
+		console.log 'requesting new with x-axis:', column, 'selector:', button	
 		App.render_url_from_html_state()
 
 

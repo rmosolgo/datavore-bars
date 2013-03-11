@@ -69,7 +69,7 @@ scale_y_to_fit = (bar_data) ->
 					"#{d3.round((amount/1000000),1)}M"
 				else if amount >= 1000000000
 					"#{d3.format("0,r")(d3.round((amount/1000000000),2))}B")
-		.ticks(6)
+		.ticks(4)
 
 	App.amount_color_scale = d3.scale.linear()
 		.domain([
@@ -238,3 +238,5 @@ App.render_dashboard = (options) ->
 		.on('click', (d,i) -> App.show_overlay(d.key, {page: 1}))
 	console.log "finished rendering!"
 
+	# This is returned for CSV making
+	prepared_data

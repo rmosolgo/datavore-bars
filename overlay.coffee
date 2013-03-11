@@ -117,7 +117,7 @@ table_row = (item,i) ->
 					style='color:#28a;' 
 					href='#{href}'
 					target='_blank'>
-					#{i+1}
+					#{i+1} <i class='icon-share'></i>
 				</a>
 			</td>"
 	else

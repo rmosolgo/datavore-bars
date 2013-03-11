@@ -4,7 +4,7 @@ App.config =
 	chart_title: "China in Africa"
 	chart_longer_title: "China in Africa"
 
-	vis_height: 300
+	vis_height: 200
 	vis_width: 800
 	vis_padding_left: 100
 	vis_padding_top: 10
@@ -12,7 +12,7 @@ App.config =
 
 	# Set this to true to rescale
 	# every time the vis renders.
-	always_rescale_to_fit: true
+	always_rescale_to_fit: false
 	always_remove_blanks: false
 
 	# joins params in the url
@@ -128,6 +128,33 @@ App.config =
 				now_showing:
 					single: (single) -> "for #{single}"
 					multiple: (multiple) -> "for #{multiple.length} sectors"
+			},
+			{ 
+				name: "Intent"
+				values_function: (data) -> (d["intent"] for d in data)
+				interface_type: "filter"
+				dv_type: dv.type.ordinal
+				now_showing:
+					single: (single) -> "for #{single}"
+					multiple: (multiple) -> "" #by #{multiple.length} modalities"
+			},
+			{ 
+				name: "Status"
+				values_function: (data) -> (d["status"] for d in data)
+				interface_type: "filter"
+				dv_type: dv.type.ordinal
+				now_showing:
+					single: (single) -> "for #{single}"
+					multiple: (multiple) -> "" #by #{multiple.length} modalities"
+			},
+			{ 
+				name: "Flow"
+				values_function: (data) -> (d["flow"] for d in data)
+				interface_type: "filter"
+				dv_type: dv.type.ordinal
+				now_showing:
+					single: (single) -> "for #{single}"
+					multiple: (multiple) -> "" #by #{multiple.length} modalities"
 			},
 			{
 				name: "ProjectID",

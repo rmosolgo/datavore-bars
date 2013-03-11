@@ -45,7 +45,8 @@ App.initialize = (csv) ->
 		App.other_attributes = (d.name for d in App.config.data.columns when d.interface_type == 'none')
 		App.attributes = (d.name for d in App.config.data.columns)
 
-		make_filter_selectors f for f in App.filters 
+		make_filter_selectors App.filters
+		
 
 		make_value_selector(App.values)
 
@@ -69,10 +70,26 @@ make_value_selector = (values) ->
 								</span>").join(" ")
 		)
 
-make_filter_selectors = (column_name, span_size = "3", default_active = "inactive") ->
-	console.log "make filter selector for ", column_name
+make_filter_selectors = (filters) -> 
+	filter_counter = 0
+	container_counter = 0
+	
+	for f in filters 
 
-	$('#filter_container').append(
+		if filter_counter % 4 == 0
+			container_counter += 1
+			$('#filter_container').append("
+				<div class='filter_subcontainer_#{container_counter} row-fluid'>
+				</div>
+				")
+
+		make_filter_selector f, ".filter_subcontainer_#{container_counter}" 
+		filter_counter +=1
+
+make_filter_selector = (column_name, container_target, span_size = "3", default_active = "inactive") ->
+	console.log "make filter selector for ", column_name, "in", container_target
+
+	$(container_target).append(
 			"<div class='accordion-group span#{span_size}'>
 
 				<div class='accordion-heading'>
