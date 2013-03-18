@@ -12,7 +12,7 @@ hide_data = (d, i) ->
 
 update_now_showing = (d) ->
 	# console.log(d)
-	filters = App.get_all_filters({all_if_none: true})
+	filters = App.get_all_filters({all_if_none: true, rerender: false})
 	now_showing = {}
 
 	filters.forEach((filter) ->
@@ -40,25 +40,24 @@ update_now_showing = (d) ->
 	$('#detail').text(now_showing_string)
 
 
-scale_y_to_fit = (bar_data) ->
-	# console.log "scale_y_to_fit", bar_data
+scale_measure_to_fit = (bar_data) ->
 	$('#rescale').removeClass("btn-warning").addClass("btn-primary")
 
-	amount_domain = [
+	measure_domain = [
 		0, 
-		d3.max(bar_data.map((d) -> d.value))
+		d3.max(d.value for d in bar_data)
 		]
 
 	cfg = App.config
 
-	App.amount_scale = d3.scale.linear()
-		.domain(amount_domain)
+	App.measure_scale = d3.scale.linear()
+		.domain(measure_domain)
 		.range([cfg.vis_height - cfg.vis_padding_top - cfg.vis_padding_bottom, 5])
 		#.ticks(6)
 		#.exponent(.5)
 
-	y_axis = d3.svg.axis()
-		.scale(App.amount_scale)
+	measure_axis = d3.svg.axis()
+		.scale(App.measure_scale)
 		.orient('right')
 		.tickFormat((amount) ->
 				if 1000 >= amount 
@@ -71,11 +70,11 @@ scale_y_to_fit = (bar_data) ->
 					"#{d3.format("0,r")(d3.round((amount/1000000000),2))}B")
 		.ticks(4)
 
-	App.amount_color_scale = d3.scale.linear()
+	App.measure_color_scale = d3.scale.linear()
 		.domain([
-			amount_domain[0],
-			amount_domain[1]/2,
-			amount_domain[1] * 1.1
+			measure_domain[0],
+			measure_domain[1]/2,
+			measure_domain[1] * 1.1
 			])
 		.range(['blue', 'purple', 'red'])
 
@@ -88,7 +87,7 @@ scale_y_to_fit = (bar_data) ->
 		.attr('transform', "translate(10, #{cfg.vis_padding_top})")
 
 	y_axis_svg
-		.call(y_axis)
+		.call(measure_axis)
 
 
 
@@ -107,7 +106,7 @@ App.render_dashboard = (options) ->
 	console.log "Getting all filters"
 	filters = App.get_all_filters()
 
-	filtered_data = App.projects.where((table, row) ->
+	filtered_data = App.data.where((table, row) ->
 		passes = true
 		filters.forEach((filter) ->
 			if (filter.values.length > 0 && !(table.get(filter.key, row) in filter.values))				
@@ -121,29 +120,32 @@ App.render_dashboard = (options) ->
 	# calculate sums by x-axis
 	this_x_axis = App.current_x_axis()
 
-	console.log "x-axis:", this_x_axis
+	
 
+	this_y_axis = _.find(App.config.data.columns, (d) -> d.name == App.current_y_axis())
+	console.log "x-axis:", this_x_axis, "y-axis:", this_y_axis
 	sum_result = filtered_data.query({
 		dims: [this_x_axis],
 		# This needs to be abstracted
-		vals: [dv.sum(App.current_y_axis())],
+		vals: [this_y_axis.dv_measure(this_y_axis.name)],
 		# i tried using sparse query and where, but it was ~slow~!
 		})
 
 	console.log "starting to make sums"
 	html_state_sums = sum_result[0].map((d,i) ->
-		{key: d, value: sum_result[1][i]}
+		v = sum_result[1][i]
+		{key: d, value: v}
 	)
 
 	console.log "summing by", this_x_axis, "returned", html_state_sums
 	
 	# render new x-axis
 	if App.remove_blanks() || App.config.always_remove_blanks 
-		prepared_data = (s for s in html_state_sums when s.value > 0)
+		prepared_data = (s for s in html_state_sums when (s.value > 0))
 
 	else
 		active_x_values = App.get_filter_values(this_x_axis, {all_if_none: true})
-		prepared_data = (s for s in html_state_sums when s.key in active_x_values )
+		prepared_data = (s for s in html_state_sums when (s.key in active_x_values))
 
 	console.log "about to make my domain:", prepared_data	
 	domain = _.sortBy(prepared_data, App.sort_order_function() ).map((d) -> d.key)
@@ -182,7 +184,7 @@ App.render_dashboard = (options) ->
 	# Y-SCALE still controlled separately
 	if !App.amount_scale || rescale_y_by_request
 		console.log "Fetching a new y-scale"
-		scale_y_to_fit(prepared_data)
+		scale_measure_to_fit(prepared_data)
 	
 	console.log "binding and rendering new bars"
 	bars = App.svg.selectAll(".bar")
@@ -202,16 +204,16 @@ App.render_dashboard = (options) ->
 	bars.transition()
 			.delay((d,i) -> i*10 )
 			.attr("x", (d,i) -> "#{ App.config.vis_padding_left + x_scale(d.key) }px")
-			.attr("y", (d) -> App.config.vis_padding_top + App.amount_scale(d.value) + "px" )
+			.attr("y", (d) -> App.config.vis_padding_top + App.measure_scale(d.value) + "px" )
 			.attr("width", x_width )
 			.attr("height", (d) -> 
-				h = max_bar_h - App.amount_scale(d.value) 
+				h = max_bar_h - App.measure_scale(d.value) 
 				if h > max_bar_h
 					the_graph_is_too_big = true
 				if h > biggest_bar
 					biggest_bar = h
 				h + "px" )
-			.style("fill", (d) -> App.amount_color_scale(d.value) )
+			.style("fill", (d) -> App.measure_color_scale(d.value) )
 
 	console.log "resizing according to calculated sizes"
 	if biggest_bar < (max_bar_h/2) 
@@ -223,14 +225,14 @@ App.render_dashboard = (options) ->
 		$('#rescale').addClass("btn-primary").removeClass("btn-warning")
 
 	if the_graph_is_too_big || App.config.always_rescale_to_fit 
-		scale_y_to_fit(prepared_data)		
+		scale_measure_to_fit(prepared_data)		
 		bars.transition()
 			.delay((d,i) -> ((i*20) + 250))
-			.attr("y", (d) -> App.config.vis_padding_top + App.amount_scale(d.value) + "px" )
+			.attr("y", (d) -> App.config.vis_padding_top + App.measure_scale(d.value) + "px" )
 			.attr("height", (d) -> 
-				h = max_bar_h - App.amount_scale(d.value) 
+				h = max_bar_h - App.measure_scale(d.value) 
 				h + "px" )
-			.style("fill", (d) -> App.amount_color_scale(d.value) )
+			.style("fill", (d) -> App.measure_color_scale(d.value) )
 
 	bars
 		.on('mouseover', show_data)

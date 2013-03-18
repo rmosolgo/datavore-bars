@@ -98,6 +98,7 @@ App.set_all_filters = (set_to, column, visible_only = false) ->
 
 App.get_filter_values = (column_name, options) ->
 	get_all_if_none = options?.all_if_none || false
+	rerender = options?.rerender || true
 
 	values = $(".filters .#{column_name}.active.value")
 		.map((i,d) -> d.innerHTML.trim() )
@@ -107,7 +108,7 @@ App.get_filter_values = (column_name, options) ->
 		values = $(".filters .#{column_name}.value")
 			.map((i,d) -> d.innerHTML.trim() )
 			.get()
-		console.log "got values because none", values			
+		console.log "got values because none: #{column_name}" #, values			
 	values
 
 App.get_all_filters = (options) ->

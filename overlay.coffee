@@ -19,9 +19,9 @@ App.render_overlay_content = (target,options) ->
 	filters = (filter for filter in App.get_all_filters() when filter.key != x_axis)
 
 
-	console.log "about to filter by click with x-axis", x_axis #  "on:", App.projects
+	console.log "about to filter by click with x-axis", x_axis #  "on:", App.data
 
-	filtered_data = App.projects.where((table, row) ->
+	filtered_data = App.data.where((table, row) ->
 		passes = false
 		# console.log "outer filter", target, table
 		if (table.get(x_axis , row) == "#{target}")
@@ -85,7 +85,7 @@ App.render_overlay_content = (target,options) ->
 
 	$('.modal-body').html(
 		"<table class='table table-hover'>
-			#{table_headings(App.projects)}
+			#{table_headings(App.data)}
 			#{row_view.join("")}
 		</table>")
 

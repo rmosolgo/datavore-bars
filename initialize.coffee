@@ -19,10 +19,10 @@ App.initialize = (csv) ->
 		if App.config.data.preprocessing_function
 			data = App.config.data.preprocessing_function(data)
 
-		App.projects = dv.table()
+		App.data = dv.table()
 		
 		App.config.data.columns.forEach((c) ->
-			App.projects
+			App.data
 				.addColumn(
 					# These are defined in config.coffee
 					c.name, 
@@ -132,7 +132,7 @@ make_filter_selector = (column_name, container_target, span_size = "3", default_
 				<input type='text' class='filter_box span12' value='Type to filter...' onfocus='this.value=\"\"'>
 			</span>")
 
-	App.projects[column_name].lut.forEach((value,i) ->
+	App.data[column_name].lut.forEach((value,i) ->
 		$("#{target} .filters").append(
 			"<span 
 				data-searcher='#{value.toLowerCase()}' 
